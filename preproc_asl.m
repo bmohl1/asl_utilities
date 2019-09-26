@@ -73,7 +73,7 @@ function [subj_t1_name, task, t1_dir, routine_out] = preproc_asl(subjs)
   qc_mask_dir = fullfile(tool_dir, 'templates' , 'asl_qc');
 
   %Can change to name the directories (e.g., 'asl_3d')
-  tasks = {'asl' 'casl' 'pcaslLow' 'pcaslHigh'};
+  tasks = {'asl' 'pcaslLow' 'pcaslHigh'};
   %tasks = {'asl'};
 
   global special_templates subj_t1_dir subj_t1_file ignore_preproc;
@@ -88,9 +88,9 @@ function [subj_t1_name, task, t1_dir, routine_out] = preproc_asl(subjs)
   %    end
   %%
   if eq(gm_masking,1)
-    normedName = 'wgr';
+    normedName = 'wg';
   else
-    normedName = 'wr';
+    normedName = 'w';
   end
 
   if eq(cancel,1)
@@ -217,9 +217,9 @@ function [subj_t1_name, task, t1_dir, routine_out] = preproc_asl(subjs)
             [task_dir orig_file_name ext] = fileparts(orig_file_name);
 
             %% Checking coregistration
-            gmSegOut = strcat('gr',orig_file_name,ext); % GM masked ASL
+            gmSegOut = strcat('g',orig_file_name,ext); % GM masked ASL
             gmSegOut_check = dir(strcat(task_dir,filesep,gmSegOut));
-            csfSegOut = strcat('csf',orig_file_name,ext); % GM masked ASL
+            csfSegOut = strcat('c',orig_file_name,ext); % GM masked ASL
             csfSegOut_check = dir(strcat(task_dir,filesep,csfSegOut));
             coregAsl = strcat(task_dir,filesep,'r',orig_file_name,ext);
             img2norm = coregAsl;
@@ -245,7 +245,7 @@ function [subj_t1_name, task, t1_dir, routine_out] = preproc_asl(subjs)
 
             %GM mask
             if eq(gm_masking,1)
-              matlabbatch{jj}.spm.util.imcalc.input = { coregAsl  gmSeg };
+              matlabbatch{jj}.spm.util.imcalc.input = { coregAsl;  gmSeg };
               matlabbatch{jj}.spm.util.imcalc.output = gmSegOut;
               matlabbatch{jj}.spm.util.imcalc.outdir = {task_dir};
               matlabbatch{jj}.spm.util.imcalc.expression = 'i1.*(i2>.2)';
@@ -258,7 +258,7 @@ function [subj_t1_name, task, t1_dir, routine_out] = preproc_asl(subjs)
               img2norm = fullfile(task_dir,gmSegOut);
 
               %Apply CSF mask to coregistered data for comparison
-              matlabbatch{jj}.spm.util.imcalc.input = { coregAsl  csfSeg };
+              matlabbatch{jj}.spm.util.imcalc.input = { coregAsl ; csfSeg };
               matlabbatch{jj}.spm.util.imcalc.output = csfSegOut;
               matlabbatch{jj}.spm.util.imcalc.outdir = {task_dir};
               matlabbatch{jj}.spm.util.imcalc.expression = 'i1.*(i2>.2)';
@@ -358,7 +358,7 @@ function [subj_t1_name, task, t1_dir, routine_out] = preproc_asl(subjs)
 
               if ~eq(baseimg.dim, maskimg.dim)  % The resizing is essential to make sure the matrix sizes match for the "add_data" line
                     clear matlabbatch;
-                                      matlabbatch{1}.spm.spatial.coreg.write.ref = {[base_loc.folder,filesep,base_loc(1).name,',1']};
+                                      matlabbatch{1}.spm.spatial.coreg.write.ref = {[base_loc(1).folder,filesep,base_loc(1).name,',1']};
                     matlabbatch{1}.spm.spatial.coreg.write.source = {[mask_loc.folder,filesep,mask_loc.name,',1']};
                     matlabbatch{1}.spm.spatial.coreg.write.roptions.interp = 4;
                     matlabbatch{1}.spm.spatial.coreg.write.roptions.wrap = [0 0 0];

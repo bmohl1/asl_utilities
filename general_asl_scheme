@@ -1,0 +1,22 @@
+Basic workflow is: Coregistering the ASL image to the participant's native T1 image, segmenting the T1 (and normalizing to MNI space), masking the coregistered ASL with the native GM segmentation, applying the non-linear deformation matrix to bring the masked, GM ASL to MNI space. More complete steps are below.
+
+ASL preprocessing
+Convert dicom to NIFTI like normal
+- There are two smaller files that are preprocessed files from Siemens for the 3D WIP.
+- In each case, look for the smaller files and then use the last instance of the smaller files. This file should be the rCBF map.
+
+Processing:
+1) Since the rCBF map is a single volume, no realignment is completed. This is different from other ASL publications, which must somehow calculate the CBF from multiple maps. Our WIP acquisition provides a pre-calculated map, using Siemens' algorithms.
+2) The aligned rCBF map must be AC-PC aligned.
+3) The rCBF map is coregistered to the T1 in native space.
+
+-------------------- Side bar about T1 processing-----------------------
+4a) The 6 tissue prior maps from SPM (3x3x3 resolution) are used as the basis for the segmentation of gray matter (GM), WM, CSF, dura, skull, and background/extraskullar elements
+4b) This process of using the priors requires non-linear coregistration to MNI space. {The y_file is the forward deformation warp field that takes the subject to standard space.}
+4c) The output y_file and GM segmentation are the basis of pulling the voxels in the ASL scan with the highest probability of being white matter forward into the common brain space.
+
+Returning to the ASL pipeline
+5) The native space GM map is binarized and multiplied to the coregistered (r) ASL. (This step results in background noise from the ASL scan being pulled forward in the analysis and can show up at the 2nd level contrast.)
+6) The GM (g), coregistered (r) ASL map is transformed into MNI space with the y_file, warp field.
+7) The warped (w), GM (g), coregistered (r) ASL map are smoothed with a 6x6x6 kernel to improve SNR.
+8) The swgr prefixed files can be compared in a 2nd level analysis.
